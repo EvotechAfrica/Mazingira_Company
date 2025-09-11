@@ -1,9 +1,13 @@
+<?php
+# Connexion à la BD
+include 'connexion/connexion.php';
+?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Connexion Administrateur</title>
+    <title>Connexion</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="icon" href="img/mazLogo.jpg" type="image/png">
     <style>
@@ -34,19 +38,29 @@
             <img src="img/mazLogo.jpg" alt="Logo Mazingira" class="w-16 h-16 rounded-full mb-4">
             <h2 class="text-2xl font-bold text-gray-800">Se connecter</h2>
         </div>
-        
-        <form action="dashboard.php" method="post">
+
+        <?php
+        if (isset($_SESSION['msg']) && !empty($_SESSION['msg'])) { ?>
+            <div class="bg-red-100 text-red-800 p-3 rounded-md text-center mb-4">
+                <?= $_SESSION['msg'] ?>
+            </div>
+        <?php
+            unset($_SESSION['msg']);
+        }
+        ?>
+
+        <form action="models/login.php" method="post">
             <div class="mb-4">
                 <label for="admin" class="sr-only">Identifiant</label>
                 <input 
-                    type="text" 
+                    type="mail" 
                     name="admin" 
                     id="admin" 
-                    placeholder="Identifiant" 
+                    placeholder="Identifiant@mazingira.com" 
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors" 
                     required>
             </div>
-            
+
             <div class="mb-6">
                 <label for="mdp" class="sr-only">Mot de passe</label>
                 <input 
@@ -57,7 +71,7 @@
                     class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 transition-colors" 
                     required>
             </div>
-            
+
             <button type="submit" class="w-full py-2 bg-yellow-700 text-white font-semibold rounded-md hover:bg-yellow-800 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50">
                 Se connecter
             </button>

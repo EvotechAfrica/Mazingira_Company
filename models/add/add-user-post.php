@@ -1,57 +1,70 @@
 <?php
-include('../../connexion/connexion.php');
-require_once('../../fonctions/fonctions.php');
+include '../../connexion/connexion.php';
 
-if (isset($_POST['valider'])) {
-  $nom = htmlspecialchars($_POST['nom']);
-  $postnom = htmlspecialchars($_POST['postnom']);
-  $prenom = htmlspecialchars($_POST['prenom']);
-  $telephone = htmlspecialchars($_POST['telephone']);
-  $fonction = htmlspecialchars($_POST['fonction']);
-  $pwd = htmlspecialchars($_POST['motdepasse']);
-  $statut = 0;
-  $mail = "";
-  if (is_numeric($telephone)) {
-    #verifier si l'utilisateur existe ou pas dans la bd
-    $getUserDeplicant = $connexion->prepare("SELECT * FROM `users` WHERE mail=?  AND statut=?");
-    $getUserDeplicant->execute([$mail, $statut]);
-    $tab = $getUserDeplicant->fetch();
-    if ($tab > 0) {
-      $_SESSION['msg'] = "Cet Agent existe deja dans le système!";
-      header("location:../../views/user.php");
-    } else {
-      # verify pwd vadity
-      if ($pwd != "") {
-        $fichier_tmp = $_FILES['picture']['tmp_name'];
-        $nom_original = $_FILES['picture']['name'];
-        $destination = "../../assets/img/profiles/";
-        // fonction permettant de recuperer la photo
-        $newimage = RecuperPhoto($fichier_tmp, $nom_original, $destination);
-        if ($fonction == "ceo") {
-          $mail = "CEO$prenom@Eka.com";
-        } else {
-          $mail = "Admin$prenom@Eka.com";
-        }
-
-        # Insertion data from database
-        $req = $connexion->prepare("INSERT INTO `users`(`nom`, `postnom`, `prenom`, `telephone`, `foction`, `profil`, `pwd`, `mail`, `statut`) VALUES  (?,?,?,?,?,?,?,?,?)");
-        $resultat = $req->execute([$nom, $postnom, $prenom, $telephone, $fonction, $newimage, $pwd, $mail, $statut]);
-        if ($resultat == true) {
-          $_SESSION['msg'] = "Enregistrement reussi !";
-          header("location:../../views/user.php");
-        } else {
-          $_SESSION['msg'] = "Echec d'enregistrement !";
-          header("location:../../views/user.php");
-        }
-      } else {
-        $_SESSION['msg'] = "Ajouter les modifications";
-        header("location:../../views/user.php");
-      }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    # Récupérer les données du formulaire
+    $username = $_POST['username'];
+    $email = $_POST['email'];
+    $function = $_POST['function'];
+    $password = $_POST['password'];
+    $profileImage = $_FILES['profile'];
+    $statut = 0;
+    # Validation des données
+    $errors = [];
+    if (empty($username) || empty($email) || empty($function) || empty($password) || empty($profileImage['name'])) {
+        $errors[] = "Tous les champs sont obligatoires.";
     }
-  } else {
-    $_SESSION['msg'] = "Le numero de téléphone ne doit containir des caractères alphanumeriques !";
-    header("location:../../views/user.php");
-  }
-} else {
-  header("location:../../views/user.php");
+
+    # Vérification du format de l'email
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Adresse email invalide.";
+    }
+
+    # Vérification du type de fichier
+    $allowedExtensions = ['jpg', 'jpeg', 'png'];
+    $fileExtension = pathinfo($profileImage['name'], PATHINFO_EXTENSION);
+    if (!in_array(strtolower($fileExtension), $allowedExtensions)) {
+        $errors[] = "Le fichier doit être une image au format JPG, JPEG ou PNG.";
+    }
+
+    # Vérification de la taille de l'image (max 2 Mo)
+    if ($profileImage['size'] > 2 * 1024 * 1024) {
+        $errors[] = "L'image ne doit pas dépasser 2 Mo.";
+    }
+
+    if (empty($errors)) {
+        # Hachage du mot de passe
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+        # Déplacement du fichier téléchargé
+        $uploadDir = '../../img/profiles/';
+        $uploadFile = $uploadDir . basename($profileImage['name']);
+        if (move_uploaded_file($profileImage['tmp_name'], $uploadFile)) {
+            # Insertion de l'utilisateur dans la base de données
+            $query = "INSERT INTO `users`(`nom`, `fonction`, `mail`, `pwd`, `photo`, `statut`) VALUES (:username, :function,:email,  :password, :profile, :statut)";
+            $stmt = $connexion->prepare($query);
+            $stmt->bindParam(':username', $username);
+            $stmt->bindParam(':function', $function);
+            $stmt->bindParam(':email', $email);            
+            $stmt->bindParam(':password', $hashedPassword);
+            $stmt->bindParam(':profile', $profileImage['name']);
+            $stmt->bindParam(':statut', $statut);
+
+            if ($stmt->execute()) {
+                $_SESSION['msg'] = "Utilisateur enregistré avec succès.";
+                header("Location: ../../views/user.php"); 
+                exit();
+            } else {
+                $_SESSION['msg'] = "Erreur lors de l'enregistrement de l'utilisateur.";
+            }
+        } else {
+            $_SESSION['msg'] = "Erreur lors du téléchargement de l'image.";
+        }
+    } else {
+        $_SESSION['msg'] = implode("<br>", $errors);
+    }
+
+    # Rediriger vers la page du formulaire
+    header("Location: ../../views/user.php?NewUser");
+    exit();
 }

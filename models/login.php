@@ -1,44 +1,38 @@
 <?php
-include '../connexion/connexion.php';
+include '../connexion/connexion.php'; 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Récupération des données du formulaire
-    $email = trim($_POST['email']);
-    $password = trim($_POST['password']);
+    # Récupérer les identifiants
+    $username = $_POST['admin'];
+    $password = $_POST['mdp'];
+     echo $username;
+     echo $password;
 
-    // Validation des entrées
-    if (empty($email) || empty($password)) {
-        $_SESSION['msg'] = "L'email et le mot de passe sont obligatoires.";
-        header("Location: ../login.php");
-        exit();
-    } 
-
-    // Préparation de la requête pour récupérer l'utilisateur
-    $query = "SELECT * FROM users WHERE mail = :email";
-    $stmt = $pdo->prepare($query);
-    $stmt->bindParam(':email', $email);
+    # Préparer et exécuter la requête pour vérifier l'utilisateur
+    $query = "SELECT * FROM users WHERE mail = :username";
+    $stmt = $connexion->prepare($query);
+    $stmt->bindParam(':username', $username);
     $stmt->execute();
+
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    $pwd = $user['pwd'];
 
-    // Vérification de l'utilisateur et du mot de passe
-    # if ($user && password_verify($password, $user['pwd']))
-    if ($password == $pwd) {
-        // Informations de l'utilisateur stockées dans la session
+    # Vérifier si l'utilisateur existe et si le mot de passe est correct
+    if ($user && password_verify($password, $user['pwd'])) {
+        # Stocker les informations de l'utilisateur dans la session
         $_SESSION['user_id'] = $user['id'];
-        $_SESSION['user_nom'] = $user['nom'];
-        $_SESSION['user_fonction'] = $user['fonction'];
+        $_SESSION['username'] = $user['mail'];
+        $_SESSION['msg'] = "Connexion réussie !";
 
-        // Redirection vers la page d'accueil ou tableau de bord
-        header("Location: ../views/home.php");
+        # Rediriger vers le tableau de bord
+        header("Location: ../Views/home.php");
         exit();
     } else {
-        $_SESSION['msg'] = "Identifiants invalides.";
-        header("Location: ../login.php");
+        # Message d'erreur en cas d'identifiants incorrects
+        $_SESSION['msg'] = "Identifiant ou mot de passe incorrect.";
+        header("Location: ../admin.php");
         exit();
     }
-} else {
-    $_SESSION['msg'] = "Méthode de requête invalide.";
-    header("Location: ../login.php");
+}else{
+    header("Location: ../admin.php");
     exit();
 }

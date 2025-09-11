@@ -10,6 +10,11 @@
         </div>
         <nav class="mt-4">
             <ul>
+                <li class="px-6 py-2 hover:bg-gray-700">
+                    <a href="home.php" class="flex items-center">
+                        <i class="fas fa-home mr-2"></i> Accueil
+                    </a>
+                </li>
                 <li x-data="{ subOpen: false }">
                     <button @click="subOpen = !subOpen" class="w-full px-6 py-2 flex items-center justify-between hover:bg-gray-700">
                         <span><i class="fas fa-newspaper mr-3"></i> Articles</span>
@@ -46,20 +51,19 @@
                         <i :class="userOpen ? 'fas fa-chevron-up' : 'fas fa-chevron-down'"></i>
                     </button>
                     <div x-show="userOpen" x-cloak class="bg-gray-700 ml-8 space-y-2">
-                        <a href="nouvel-utilisateur.php" class="block px-4 py-2 text-sm hover:bg-gray-600">
+                        <a href="user.php?NewUser" class="block px-4 py-2 text-sm hover:bg-gray-600">
                             <i class="fas fa-plus-circle mr-2"></i> Nouvel Utilisateur
                         </a>
-                        <a href="liste-utilisateurs.php" class="block px-4 py-2 text-sm hover:bg-gray-600">
+                        <a href="user.php" class="block px-4 py-2 text-sm hover:bg-gray-600">
                             <i class="fas fa-list mr-2"></i> Liste Utilisateurs
                         </a>
                     </div>
                 </li>
                 <li class="px-6 py-2 hover:bg-gray-700">
-                    <a href="deconnexion.php" class="flex items-center">
+                    <a href="../models/log-out.php" class="flex items-center">
                         <i class="fas fa-sign-out-alt mr-2"></i> Se déconnecter
                     </a>
                 </li>
-
             </ul>
         </nav>
     </div>

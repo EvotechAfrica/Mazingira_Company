@@ -72,7 +72,7 @@ require_once('models/select/select-galerie.php'); // Ligne ajoutée
         <div class="w-full lg:w-2/3 text-justify bg-white p-8 rounded-lg shadow-xl mb-8 lg:mb-0">
             <h2 class="text-4xl font-extrabold text-yellow-700 mb-6 text-center lg:text-left">Notre Histoire</h2>
             <p class="text-gray-700 leading-relaxed mb-4">
-                MazingiraCompany a été fondée en 2022 par un groupe de passionnés de l’environnement,
+                MazingiraCompany a été fondée en 2019 par un groupe de passionnés de l’environnement,
                 désireux de contribuer activement à la préservation de la nature et au développement
                 durable. Depuis sa création, l’entreprise s’est engagée à sensibiliser les communautés
                 locales à l’importance de la protection de l’écosystème, tout en proposant des solutions

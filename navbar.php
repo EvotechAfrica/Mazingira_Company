@@ -57,7 +57,7 @@
 
         <a href="index.php" class="flex items-center space-x-3 rtl:space-x-reverse transition-transform duration-300 hover:scale-105">
             <img src="img/mazLogo.jpg" class="h-10" alt="MazingiraCompany Logo" />
-            <span class="self-center text-2xl font-bold whitespace-nowrap text-gray-900">MazingiraCompany</span>
+            <span class="self-center text-2xl font-bold whitespace-nowrap text-gray-900">MAZINGIRA COMPANY</span>
         </a>
 
         <button data-collapse-toggle="navbar-default" type="button" class="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200" aria-controls="navbar-default" aria-expanded="false">

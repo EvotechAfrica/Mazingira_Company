@@ -2,7 +2,7 @@
 # Connexion à la BD
 include '../connexion/connexion.php';
 # Appel de la page qui fait les affichages
-require_once('../models/select/select-utilisateurs.php');
+require_once('../models/select/select-User.php');
 
 ?>
 <!DOCTYPE html>
@@ -11,7 +11,7 @@ require_once('../models/select/select-utilisateurs.php');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Utilisateurs - MazingiraCompany Admin</title>
+    <title>MazingiraCompany</title>
     <?php require_once 'style.php'; ?>
 </head>
 
@@ -33,38 +33,61 @@ require_once('../models/select/select-utilisateurs.php');
 
             <div class="p-4 md:p-6">
                 <?php
+                # Affichage des messages de session (Notifications)
                 if (isset($_SESSION['msg']) && !empty($_SESSION['msg'])) { ?>
-                    <div class="w-full mt-3">
-                        <div class="bg-blue-100 text-blue-800 p-3 rounded-md text-center">
-                            <?= $_SESSION['msg'] ?>
-                        </div>
+                    <div class="bg-blue-100 text-blue-800 p-3 rounded-md text-center mb-4">
+                        <?= $_SESSION['msg'] ?>
                     </div>
-                <?php }
-                unset($_SESSION['msg']);
-
+                <?php
+                    unset($_SESSION['msg']);
+                }
                 if (isset($_GET['NewUser']) || isset($_GET['idUser'])) {
                 ?>
                     <h3 class="text-2xl font-bold text-center text-gray-700 mb-6"><?= $title ?></h3>
                     <div class="flex flex-col md:flex-row items-center md:items-start justify-center md:justify-start gap-6">
-                        <form action="<?= $Action ?>" method="post" class="w-2/3 bg-white p-6 rounded shadow-md flex flex-wrap ml-6">
+                        <form action="<?= $action ?>" method="post" enctype="multipart/form-data" class="w-2/3 bg-white p-6 rounded shadow-md flex flex-wrap ml-6">
+                            <input type="hidden" name="user_id" value="<?= $utilisateur['id'] ?>">
                             <div class="w-full px-3 mb-6">
                                 <label class="block text-gray-700 font-bold mb-2 flex items-center" for="username">
                                     <i class="fas fa-user mr-2"></i> Nom d'utilisateur
                                 </label>
-                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="username" required>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="username" type="text" name="username" value="<?= isset($utilisateur['nom']) ? htmlspecialchars($utilisateur['nom']) : '' ?>" required>
                             </div>
                             <div class="w-full px-3 mb-6">
                                 <label class="block text-gray-700 font-bold mb-2 flex items-center" for="email">
                                     <i class="fas fa-envelope mr-2"></i> Email
                                 </label>
-                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" name="email" required>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" name="email" value="<?= isset($utilisateur['mail']) ? htmlspecialchars($utilisateur['mail']) : '' ?>" required>
                             </div>
+                            <div class="w-full px-3 mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 flex items-center" for="function">
+                                    <i class="fas fa-briefcase mr-2"></i> Fonction
+                                </label>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="function" type="text" name="function" value="<?= isset($utilisateur['fonction']) ? htmlspecialchars($utilisateur['fonction']) : '' ?>" required>
+                            </div>
+                            <div class="w-full px-3 mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 flex items-center" for="password">
+                                    <i class="fas fa-lock mr-2"></i> Mot de passe (laisser vide pour ne pas changer)
+                                </label>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="password" type="password" name="password">
+                            </div>
+                            <div class="w-full px-3 mb-6">
+                                <label class="block text-gray-700 font-bold mb-2 flex items-center" for="profile">
+                                    <i class="fas fa-user-shield mr-2"></i> Profil (Image)
+                                </label>
+                                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="photo" type="file" accept="image/*" onchange="previewPhoto(event)" name="profile">
+                            </div>
+
                             <div class="w-full px-3 mb-6 flex justify-end">
-                                <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-gray-400" name="valider">
-                                    <?= $btn ?>
+                                <button class="bg-gray-600 text-white font-semibold py-2 px-4 rounded shadow hover:bg-gray-400" type="submit" name="valider">
+                                    Enregistrer
                                 </button>
                             </div>
                         </form>
+                        <div id="photo-preview" class="w-full mt-6 md:mt-0 md:w-auto flex-shrink-0">
+                            <i class="fa-regular fa-image"></i>
+                            <img id="photo-output" alt="Prévisualisation de la photo">
+                        </div>
                     </div>
                 <?php
                 } else {
@@ -77,7 +100,7 @@ require_once('../models/select/select-utilisateurs.php');
                                 <div class="w-full sm:w-2/3 mb-4 sm:mb-0">
                                     <input type="text" id="searchInput" onkeyup="searchTable()" placeholder="Rechercher un utilisateur..." class="w-full p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400">
                                 </div>
-                                <a href="utilisateurs.php?NewUser" class="bg-gray-600 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 flex items-center sm:ml-4">
+                                <a href="user.php?NewUser" class="bg-gray-600 text-white px-4 py-2 rounded-full shadow-lg transition-colors duration-200 flex items-center sm:ml-4">
                                     <i class="fas fa-plus-circle mr-2"></i>
                                     Ajouter
                                 </a>
@@ -89,20 +112,24 @@ require_once('../models/select/select-utilisateurs.php');
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom d'utilisateur</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fonction</th>
+                                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Profil</th>
                                         <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     <?php
                                     $i = 1;
-                                    while ($utilisateur = $getUtilisateurs->fetch()) {
+                                    while ($utilisateur = $getUser->fetch()) {
                                     ?>
                                         <tr>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><?= $i++ ?></td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $utilisateur['username'] ?></td>
-                                            <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $utilisateur['email'] ?></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $utilisateur['nom'] ?></td>
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900"><?= $utilisateur['mail'] ?></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><?= $utilisateur['fonction'] ?></td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><img src="../img/profiles/<?= $utilisateur['photo'] ?>" alt="Profil" class="w-10 h-10 rounded-full"></td>
                                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                                <a href="utilisateurs.php?idUser=<?= $utilisateur['id'] ?>" class="text-blue-600 hover:text-blue-800" title="Modifier">
+                                                <a href="user.php?idUser=<?= $utilisateur['id'] ?>" class="text-blue-600 hover:text-blue-800" title="Modifier">
                                                     <i class="bi bi-pencil-square"></i>
                                                 </a>
                                                 <button onclick="openDeleteModal('<?= $utilisateur['id'] ?>')" title="Supprimer" class="text-red-600 hover:text-red-800">
@@ -140,7 +167,7 @@ require_once('../models/select/select-utilisateurs.php');
             const confirmButton = document.getElementById('confirmDeleteButton');
             const hiddenDeleteId = document.getElementById('hiddenDeleteId');
             hiddenDeleteId.value = id;
-            confirmButton.href = `../models/delete/delete_utilisateur.php?id=${id}`;
+            confirmButton.href = `../models/delete/delete_user.php?id=${id}`;
             modal.classList.remove('hidden');
             document.body.classList.add('overflow-hidden');
         }
